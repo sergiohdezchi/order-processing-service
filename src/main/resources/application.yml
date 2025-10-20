@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: order-processing-service
+
+# Server configuration
+server:
+  port: 8080
+
+# Actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,loggers,prometheus
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  health:
+    defaults:
+      enabled: true
+
+# Info endpoint
+info:
+  app:
+    name: Order Processing Service
+    description: Hacom Telecom Order Processing Service
+    version: 0.0.1-SNAPSHOT
