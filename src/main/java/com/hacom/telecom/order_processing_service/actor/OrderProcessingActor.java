@@ -35,13 +35,6 @@ public class OrderProcessingActor extends AbstractActor {
         log.info("Processing order: {}", message.getOrderId());
         
         try {
-            // Simular procesamiento (validaciones, cálculos, etc.)
-            log.info("Validating order items...");
-            Thread.sleep(1000); // Simular trabajo de procesamiento
-            
-            log.info("Calculating totals...");
-            Thread.sleep(500);
-            
             log.info("Saving order to database...");
             
             // Guardar el pedido en MongoDB de forma reactiva

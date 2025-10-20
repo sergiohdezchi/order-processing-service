@@ -17,7 +17,6 @@ public class OrderItem {
         this.price = price;
     }
 
-    // Getters and Setters
     public String getItemId() {
         return itemId;
     }

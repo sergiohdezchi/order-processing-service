@@ -31,7 +31,6 @@ public class Order {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public String getOrderId() {
         return orderId;
     }

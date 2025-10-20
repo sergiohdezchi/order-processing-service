@@ -29,7 +29,7 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
                     .collect(Collectors.toList());
 
             // Delegar el procesamiento al Actor (procesamiento asíncrono)
-            // El Actor se encargará de guardar el pedido y enviar la respuesta gRPC
+            // El Actor se encarga de guardar el pedido y enviar la respuesta gRPC
             actorService.processOrder(
                     request.getOrderId(),
                     request.getCustomerId(),
