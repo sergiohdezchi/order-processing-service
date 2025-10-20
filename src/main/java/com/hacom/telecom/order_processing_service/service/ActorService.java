@@ -24,13 +24,16 @@ public class ActorService {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private SmppClientService smppClientService;
+
     private ActorRef orderProcessingActor;
 
     @PostConstruct
     public void init() {
         // Crear el actor de procesamiento de pedidos
         orderProcessingActor = actorSystem.actorOf(
-            Props.create(OrderProcessingActor.class, orderService),
+            Props.create(OrderProcessingActor.class, orderService, smppClientService),
             "orderProcessingActor"
         );
     }

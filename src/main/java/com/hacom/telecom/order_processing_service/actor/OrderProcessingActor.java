@@ -5,6 +5,7 @@ import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import com.hacom.telecom.order_processing_service.grpc.CreateOrderResponse;
 import com.hacom.telecom.order_processing_service.service.OrderService;
+import com.hacom.telecom.order_processing_service.service.SmppClientService;
 
 /**
  * Actor que procesa pedidos de forma asíncrona
@@ -13,9 +14,11 @@ public class OrderProcessingActor extends AbstractActor {
 
     private final LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
     private final OrderService orderService;
+    private final SmppClientService smppClientService;
 
-    public OrderProcessingActor(OrderService orderService) {
+    public OrderProcessingActor(OrderService orderService, SmppClientService smppClientService) {
         this.orderService = orderService;
+        this.smppClientService = smppClientService;
     }
 
     @Override
@@ -51,6 +54,7 @@ public class OrderProcessingActor extends AbstractActor {
                         new OrderMessages.OrderSaved(
                             order.getOrderId(), 
                             order.getStatus(),
+                            message.getCustomerPhone(),
                             message.getResponseObserver()
                         ), 
                         getSelf()
@@ -95,6 +99,10 @@ public class OrderProcessingActor extends AbstractActor {
                 order -> log.info("Order status updated to PROCESSING: {}", order.getOrderId()),
                 error -> log.error("Error updating order status: {}", error.getMessage())
             );
+        
+        // Enviar SMS de notificación
+        log.info("Sending SMS notification for order: {}", message.getOrderId());
+        smppClientService.sendOrderProcessedNotification(message.getOrderId(), message.getCustomerPhone());
         
         // Enviar respuesta gRPC
         CreateOrderResponse response = CreateOrderResponse.newBuilder()

@@ -46,6 +46,10 @@ dependencies {
 	implementation 'com.typesafe.akka:akka-actor_2.13:2.6.20'
 	implementation 'com.typesafe.akka:akka-slf4j_2.13:2.6.20'
 	
+	// Cloudhopper SMPP dependencies
+	implementation 'com.cloudhopper:ch-smpp:5.0.9'
+	implementation 'com.cloudhopper:ch-commons-charset:3.0.2'
+	
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 	}

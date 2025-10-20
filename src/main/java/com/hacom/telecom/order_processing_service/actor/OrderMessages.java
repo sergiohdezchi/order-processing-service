@@ -58,11 +58,13 @@ public class OrderMessages {
     public static class OrderSaved implements Serializable {
         private final String orderId;
         private final String status;
+        private final String customerPhone;
         private final StreamObserver<CreateOrderResponse> responseObserver;
 
-        public OrderSaved(String orderId, String status, StreamObserver<CreateOrderResponse> responseObserver) {
+        public OrderSaved(String orderId, String status, String customerPhone, StreamObserver<CreateOrderResponse> responseObserver) {
             this.orderId = orderId;
             this.status = status;
+            this.customerPhone = customerPhone;
             this.responseObserver = responseObserver;
         }
 
@@ -72,6 +74,10 @@ public class OrderMessages {
 
         public String getStatus() {
             return status;
+        }
+
+        public String getCustomerPhone() {
+            return customerPhone;
         }
 
         public StreamObserver<CreateOrderResponse> getResponseObserver() {
