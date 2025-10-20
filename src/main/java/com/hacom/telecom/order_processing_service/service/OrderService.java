@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Service
@@ -19,19 +20,13 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    /**
-     * Crea un pedido. Si ya existe un pedido con ese orderId, devuelve el existente.
-     * No crea duplicados basándose en el orderId del negocio (no confundir con el _id de MongoDB).
-     */
     public Mono<Order> createOrder(String orderId, String customerId, String customerPhoneNumber, List<OrderItem> items) {
         return orderRepository.findByOrderId(orderId)
                 .doOnNext(existingOrder -> {
-                    // Log cuando encuentra un pedido existente
                     log.info("Order with orderId '{}' already exists. Returning existing order with status: {}", 
                             orderId, existingOrder.getStatus());
                 })
                 .switchIfEmpty(
-                    // Si no existe, crear uno nuevo
                     Mono.defer(() -> {
                         log.info("Creating new order with orderId: {}", orderId);
                         Order newOrder = new Order(orderId, customerId, customerPhoneNumber, items, "PENDING");
@@ -44,9 +39,6 @@ public class OrderService {
                 );
     }
 
-    /**
-     * Actualiza el estado de un pedido buscando por orderId
-     */
     public Mono<Order> updateOrderStatus(String orderId, String status) {
         return orderRepository.findByOrderId(orderId)
                 .flatMap(order -> {
@@ -55,17 +47,19 @@ public class OrderService {
                 });
     }
 
-    /**
-     * Busca un pedido por orderId (no por el _id de MongoDB)
-     */
     public Mono<Order> findOrderByOrderId(String orderId) {
         return orderRepository.findByOrderId(orderId);
     }
     
-    /**
-     * Busca un pedido por su _id de MongoDB
-     */
     public Mono<Order> findOrderById(String id) {
         return orderRepository.findById(id);
+    }
+    
+    public Mono<Long> countOrdersByDateRange(OffsetDateTime startDate, OffsetDateTime endDate) {
+        log.info("Counting orders between {} and {}", startDate, endDate);
+        return orderRepository.countByTsBetween(startDate, endDate)
+                .doOnSuccess(count -> 
+                    log.info("Found {} orders in the specified date range", count)
+                );
     }
 }
