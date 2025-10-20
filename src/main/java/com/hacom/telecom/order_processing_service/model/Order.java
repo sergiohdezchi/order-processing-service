@@ -3,32 +3,31 @@ package com.hacom.telecom.order_processing_service.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Document(collection = "orders")
 public class Order {
     
     @Id
+    private String id;
     private String orderId;
     private String customerId;
-    private String customerPhone;
+    private String customerPhoneNumber;
     private List<OrderItem> items;
     private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private OffsetDateTime ts;
 
     public Order() {
     }
 
-    public Order(String orderId, String customerId, String customerPhone, List<OrderItem> items, String status) {
+    public Order(String orderId, String customerId, String customerPhoneNumber, List<OrderItem> items, String status) {
         this.orderId = orderId;
         this.customerId = customerId;
-        this.customerPhone = customerPhone;
+        this.customerPhoneNumber = customerPhoneNumber;
         this.items = items;
         this.status = status;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.ts = OffsetDateTime.now();
     }
 
     public String getOrderId() {
@@ -47,12 +46,12 @@ public class Order {
         this.customerId = customerId;
     }
 
-    public String getCustomerPhone() {
-        return customerPhone;
+    public String getCustomerPhoneNumber() {
+        return customerPhoneNumber;
     }
 
-    public void setCustomerPhone(String customerPhone) {
-        this.customerPhone = customerPhone;
+    public void setCustomerPhoneNumber(String customerPhoneNumber) {
+        this.customerPhoneNumber = customerPhoneNumber;
     }
 
     public List<OrderItem> getItems() {
@@ -69,22 +68,14 @@ public class Order {
 
     public void setStatus(String status) {
         this.status = status;
-        this.updatedAt = LocalDateTime.now();
+        this.ts = OffsetDateTime.now();
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public OffsetDateTime getTs() {
+        return ts;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setTs(OffsetDateTime ts) {
+        this.ts = ts;
     }
 }

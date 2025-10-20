@@ -15,8 +15,8 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public Mono<Order> createOrder(String orderId, String customerId, String customerPhone, List<OrderItem> items) {
-        Order order = new Order(orderId, customerId, customerPhone, items, "PENDING");
+    public Mono<Order> createOrder(String orderId, String customerId, String customerPhoneNumber, List<OrderItem> items) {
+        Order order = new Order(orderId, customerId, customerPhoneNumber, items, "PENDING");
         return orderRepository.save(order);
     }
 
