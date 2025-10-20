@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.hacom.telecom.order_processing_service.grpc";
+option java_outer_classname = "OrderServiceProto";
+
+package orderservice;
+
+// Servicio de procesamiento de pedidos
+service OrderService {
+  // Crear un nuevo pedido
+  rpc CreateOrder (CreateOrderRequest) returns (CreateOrderResponse);
+}
+
+// Item del pedido
+message OrderItem {
+  string item_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  double price = 4;
+}
+
+// Solicitud para crear un pedido
+message CreateOrderRequest {
+  string order_id = 1;
+  string customer_id = 2;
+  string customer_phone = 3;
+  repeated OrderItem items = 4;
+}
+
+// Respuesta de creación de pedido
+message CreateOrderResponse {
+  string order_id = 1;
+  string status = 2;
+  string message = 3;
+}
