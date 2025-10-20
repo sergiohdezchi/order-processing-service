@@ -2,9 +2,13 @@ spring:
   application:
     name: order-processing-service
 
-# Server configuration
-server:
-  port: 8080
+# Custom MongoDB configuration
+mongodbDatabase: exampleDb
+mongodbUri: "mongodb://127.0.0.1:27017"
+
+# WebFlux server configuration
+apiPort: 9898
+
 
 # Actuator configuration
 management:
