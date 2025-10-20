@@ -1,7 +1,7 @@
 package com.hacom.telecom.order_processing_service.grpc;
 
 import com.hacom.telecom.order_processing_service.model.OrderItem;
-import com.hacom.telecom.order_processing_service.service.OrderService;
+import com.hacom.telecom.order_processing_service.service.ActorService;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
 
     @Autowired
-    private OrderService orderService;
+    private ActorService actorService;
 
     @Override
     public void createOrder(CreateOrderRequest request, StreamObserver<CreateOrderResponse> responseObserver) {
@@ -28,36 +28,16 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
                     ))
                     .collect(Collectors.toList());
 
-            // Crear el pedido
-            orderService.createOrder(
+            // Delegar el procesamiento al Actor (procesamiento asíncrono)
+            // El Actor se encargará de guardar el pedido y enviar la respuesta gRPC
+            actorService.processOrder(
                     request.getOrderId(),
                     request.getCustomerId(),
                     request.getCustomerPhone(),
-                    items
-            ).subscribe(
-                    order -> {
-                        // Enviar respuesta exitosa
-                        CreateOrderResponse response = CreateOrderResponse.newBuilder()
-                                .setOrderId(order.getOrderId())
-                                .setStatus(order.getStatus())
-                                .setMessage("Order created successfully")
-                                .build();
-                        
-                        responseObserver.onNext(response);
-                        responseObserver.onCompleted();
-                    },
-                    error -> {
-                        // Enviar respuesta de error
-                        CreateOrderResponse response = CreateOrderResponse.newBuilder()
-                                .setOrderId(request.getOrderId())
-                                .setStatus("ERROR")
-                                .setMessage("Failed to create order: " + error.getMessage())
-                                .build();
-                        
-                        responseObserver.onNext(response);
-                        responseObserver.onCompleted();
-                    }
+                    items,
+                    responseObserver
             );
+            
         } catch (Exception e) {
             // Manejo de excepciones
             CreateOrderResponse response = CreateOrderResponse.newBuilder()

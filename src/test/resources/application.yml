@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: order-processing-service-test
+
+mongodbDatabase: testDb
+mongodbUri: "mongodb://127.0.0.1:27017"
+apiPort: 0
+
+grpc:
+  server:
+    port: -1

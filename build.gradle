@@ -42,6 +42,10 @@ dependencies {
 	implementation 'io.grpc:grpc-netty-shaded:1.60.0'
 	compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
 	
+	// Akka Classic dependencies
+	implementation 'com.typesafe.akka:akka-actor_2.13:2.6.20'
+	implementation 'com.typesafe.akka:akka-slf4j_2.13:2.6.20'
+	
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 	}
