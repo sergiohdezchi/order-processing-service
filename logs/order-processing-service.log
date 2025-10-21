@@ -178,3 +178,4 @@
 2025-10-20 17:47:35.125 [OrderProcessingSession] INFO  com.cloudhopper.smpp.impl.DefaultSmppSession - received PDU: (submit_sm_resp: 0x0000001C 0x80000004 0x00000000 0x00000002 result: "OK") (body: (messageId [MSG00000022])) (opts: )
 2025-10-20 17:47:35.125 [OrderProcessingSystem-akka.actor.default-dispatcher-7] INFO  com.hacom.telecom.order_processing_service.service.SmppClientService - SMS sent successfully to +52-999-888-7777. Message ID: MSG00000022
 2025-10-20 17:47:35.125 [OrderProcessingSystem-akka.actor.default-dispatcher-7] INFO  com.hacom.telecom.order_processing_service.service.SmppClientService - Order notification SMS sent successfully for order ORD-001
+2025-10-20 23:09:37.024 [OrderProcessingSession] INFO  com.cloudhopper.smpp.impl.DefaultSmppSessionHandler - Default handling is to discard an unexpected channel closed
