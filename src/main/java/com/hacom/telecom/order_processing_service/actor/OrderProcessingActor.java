@@ -32,7 +32,7 @@ public class OrderProcessingActor extends AbstractActor {
     }
 
     /**
-     * Procesa un pedido nuevo
+     * New order processing logic
      */
     private void processOrder(OrderMessages.ProcessOrder message) {
         log.info("Processing order: {}", message.getOrderId());
@@ -40,7 +40,6 @@ public class OrderProcessingActor extends AbstractActor {
         try {
             log.info("Saving order to database...");
             
-            // Guardar el pedido en MongoDB de forma reactiva
             orderService.createOrder(
                 message.getOrderId(),
                 message.getCustomerId(),
@@ -48,7 +47,6 @@ public class OrderProcessingActor extends AbstractActor {
                 message.getItems()
             ).subscribe(
                 order -> {
-                    // Éxito: enviar mensaje de orden guardada
                     log.info("Order saved successfully: {}", order.getOrderId());
                     getSelf().tell(
                         new OrderMessages.OrderSaved(
@@ -61,7 +59,6 @@ public class OrderProcessingActor extends AbstractActor {
                     );
                 },
                 error -> {
-                    // Error: enviar mensaje de error
                     log.error("Error saving order: {}", error.getMessage());
                     getSelf().tell(
                         new OrderMessages.OrderError(
@@ -88,23 +85,20 @@ public class OrderProcessingActor extends AbstractActor {
     }
 
     /**
-     * Maneja el evento de pedido guardado exitosamente
+     * Manage the successful order saved event
      */
     private void handleOrderSaved(OrderMessages.OrderSaved message) {
         log.info("Sending success response for order: {}", message.getOrderId());
         
-        // Actualizar estado del pedido
         orderService.updateOrderStatus(message.getOrderId(), "PROCESSING")
             .subscribe(
                 order -> log.info("Order status updated to PROCESSING: {}", order.getOrderId()),
                 error -> log.error("Error updating order status: {}", error.getMessage())
             );
         
-        // Enviar SMS de notificación
         log.info("Sending SMS notification for order: {}", message.getOrderId());
         smppClientService.sendOrderProcessedNotification(message.getOrderId(), message.getCustomerPhone());
         
-        // Enviar respuesta gRPC
         CreateOrderResponse response = CreateOrderResponse.newBuilder()
                 .setOrderId(message.getOrderId())
                 .setStatus("PROCESSING")
@@ -118,12 +112,11 @@ public class OrderProcessingActor extends AbstractActor {
     }
 
     /**
-     * Maneja el evento de error al procesar pedido
+     * Manage the order processing error event
      */
     private void handleOrderError(OrderMessages.OrderError message) {
         log.error("Sending error response for order: {}", message.getOrderId());
         
-        // Enviar respuesta gRPC con error
         CreateOrderResponse response = CreateOrderResponse.newBuilder()
                 .setOrderId(message.getOrderId())
                 .setStatus("ERROR")

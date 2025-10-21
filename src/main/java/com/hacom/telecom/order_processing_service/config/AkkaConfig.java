@@ -11,7 +11,7 @@ public class AkkaConfig {
 
     @Bean
     public ActorSystem actorSystem() {
-        // Configuración de Akka
+        // Akka configuration
         Config config = ConfigFactory.parseString(
             "akka {\n" +
             "  loglevel = \"INFO\"\n" +

@@ -29,7 +29,7 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-webflux') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 	}
-	// Log4j2 con soporte para YAML
+	// Log4j2  with yaml support
 	implementation 'org.springframework.boot:spring-boot-starter-log4j2'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
@@ -37,6 +37,8 @@ dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-actuator') {
 		exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 	}
+	// Micrometer Prometheus registry
+	implementation 'io.micrometer:micrometer-registry-prometheus'
 	
 	// gRPC dependencies
 	implementation('net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE') {

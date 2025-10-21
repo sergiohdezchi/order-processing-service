@@ -18,7 +18,6 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
     @Override
     public void createOrder(CreateOrderRequest request, StreamObserver<CreateOrderResponse> responseObserver) {
         try {
-            // Convertir items de gRPC a modelo de dominio
             List<OrderItem> items = request.getItemsList().stream()
                     .map(grpcItem -> new OrderItem(
                             grpcItem.getItemId(),
@@ -28,8 +27,6 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
                     ))
                     .collect(Collectors.toList());
 
-            // Delegar el procesamiento al Actor (procesamiento asíncrono)
-            // El Actor se encarga de guardar el pedido y enviar la respuesta gRPC
             actorService.processOrder(
                     request.getOrderId(),
                     request.getCustomerId(),
@@ -39,7 +36,6 @@ public class OrderGrpcService extends OrderServiceGrpc.OrderServiceImplBase {
             );
             
         } catch (Exception e) {
-            // Manejo de excepciones
             CreateOrderResponse response = CreateOrderResponse.newBuilder()
                     .setOrderId(request.getOrderId())
                     .setStatus("ERROR")

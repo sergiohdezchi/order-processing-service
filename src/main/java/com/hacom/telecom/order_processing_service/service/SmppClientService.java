@@ -13,6 +13,7 @@ import com.cloudhopper.smpp.type.SmppChannelException;
 import com.cloudhopper.smpp.type.SmppTimeoutException;
 import com.cloudhopper.smpp.type.UnrecoverablePduException;
 import com.hacom.telecom.order_processing_service.config.SmppProperties;
+import io.micrometer.core.instrument.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,12 @@ public class SmppClientService {
     @Autowired
     private SmppProperties smppProperties;
 
+    @Autowired
+    private Counter smsSentCounter;
+
+    @Autowired
+    private Counter smsFailedCounter;
+
     private DefaultSmppClient smppClient;
     private SmppSession session;
 
@@ -40,11 +47,9 @@ public class SmppClientService {
         }
 
         try {
-            // Crear cliente SMPP
             smppClient = new DefaultSmppClient();
             log.info("SMPP client created successfully");
 
-            // Intentar conectar (puede fallar si no hay servidor SMPP disponible)
             connectToSmppServer();
         } catch (Exception e) {
             log.warn("Could not initialize SMPP client: {}. SMS sending will be disabled.", e.getMessage());
@@ -53,7 +58,6 @@ public class SmppClientService {
 
     private void connectToSmppServer() {
         try {
-            // Configuración de la sesión SMPP
             SmppSessionConfiguration config = new SmppSessionConfiguration();
             config.setWindowSize(smppProperties.getWindowSize());
             config.setName("OrderProcessingSession");
@@ -67,7 +71,6 @@ public class SmppClientService {
             config.setRequestExpiryTimeout(smppProperties.getRequestExpiryTimeout());
             config.setWindowMonitorInterval(smppProperties.getWindowMonitorInterval());
 
-            // Crear sesión
             session = smppClient.bind(config, new DefaultSmppSessionHandler());
             log.info("SMPP session bound successfully to {}:{}", smppProperties.getHost(), smppProperties.getPort());
         } catch (Exception e) {
@@ -77,7 +80,7 @@ public class SmppClientService {
     }
 
     /**
-     * Envía un SMS usando SMPP
+     * Sends an SMS message via SMPP
      */
     public boolean sendSms(String destinationNumber, String message) {
         if (!smppProperties.isEnabled()) {
@@ -96,56 +99,56 @@ public class SmppClientService {
         }
 
         try {
-            // Crear PDU de envío
             SubmitSm submit = new SubmitSm();
 
-            // Dirección de origen
             submit.setSourceAddress(new Address(
                     (byte) smppProperties.getSourceAddressTon(),
                     (byte) smppProperties.getSourceAddressNpi(),
                     smppProperties.getSourceAddress()
             ));
 
-            // Dirección de destino
             submit.setDestAddress(new Address(
                     (byte) smppProperties.getDestAddressTon(),
                     (byte) smppProperties.getDestAddressNpi(),
                     destinationNumber
             ));
 
-            // Mensaje
             submit.setShortMessage(CharsetUtil.encode(message, CharsetUtil.CHARSET_GSM));
 
-            // Enviar
             SubmitSmResp submitResp = session.submit(submit, 10000);
 
             if (submitResp.getCommandStatus() == 0) {
                 log.info("SMS sent successfully to {}. Message ID: {}", destinationNumber, submitResp.getMessageId());
+                smsSentCounter.increment();
                 return true;
             } else {
                 log.error("SMS send failed with status: {}", submitResp.getCommandStatus());
+                smsFailedCounter.increment();
                 return false;
             }
 
         } catch (SmppTimeoutException e) {
             log.error("SMS send timeout for {}: {}", destinationNumber, e.getMessage());
+            smsFailedCounter.increment();
             return false;
         } catch (SmppChannelException e) {
             log.error("SMPP channel error for {}: {}", destinationNumber, e.getMessage());
-            // Intentar reconectar en el próximo envío
             session = null;
+            smsFailedCounter.increment();
             return false;
         } catch (UnrecoverablePduException e) {
             log.error("Unrecoverable PDU error for {}: {}", destinationNumber, e.getMessage());
+            smsFailedCounter.increment();
             return false;
         } catch (Exception e) {
             log.error("Error sending SMS to {}: {}", destinationNumber, e.getMessage());
+            smsFailedCounter.increment();
             return false;
         }
     }
 
     /**
-     * Envía SMS de notificación de pedido procesado
+     * Sends an order processed notification SMS
      */
     public void sendOrderProcessedNotification(String orderId, String phoneNumber) {
         String message = "Your order " + orderId + " has been processed";

@@ -31,16 +31,12 @@ public class ActorService {
 
     @PostConstruct
     public void init() {
-        // Crear el actor de procesamiento de pedidos
         orderProcessingActor = actorSystem.actorOf(
             Props.create(OrderProcessingActor.class, orderService, smppClientService),
             "orderProcessingActor"
         );
     }
 
-    /**
-     * Envía un pedido al actor para que lo procese
-     */
     public void processOrder(String orderId, String customerId, String customerPhone, 
                            List<OrderItem> items, StreamObserver<CreateOrderResponse> responseObserver) {
         OrderMessages.ProcessOrder message = new OrderMessages.ProcessOrder(
@@ -51,7 +47,6 @@ public class ActorService {
 
     @PreDestroy
     public void shutdown() {
-        // Detener el sistema de actores al cerrar la aplicación
         actorSystem.terminate();
     }
 }

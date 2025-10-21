@@ -3,6 +3,7 @@ package com.hacom.telecom.order_processing_service.service;
 import com.hacom.telecom.order_processing_service.model.Order;
 import com.hacom.telecom.order_processing_service.model.OrderItem;
 import com.hacom.telecom.order_processing_service.repository.OrderRepository;
+import io.micrometer.core.instrument.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,21 +21,29 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private Counter ordersCreatedCounter;
+
+    @Autowired
+    private Counter ordersDuplicateCounter;
+
     public Mono<Order> createOrder(String orderId, String customerId, String customerPhoneNumber, List<OrderItem> items) {
         return orderRepository.findByOrderId(orderId)
                 .doOnNext(existingOrder -> {
                     log.info("Order with orderId '{}' already exists. Returning existing order with status: {}", 
                             orderId, existingOrder.getStatus());
+                    ordersDuplicateCounter.increment();
                 })
                 .switchIfEmpty(
                     Mono.defer(() -> {
                         log.info("Creating new order with orderId: {}", orderId);
                         Order newOrder = new Order(orderId, customerId, customerPhoneNumber, items, "PENDING");
                         return orderRepository.save(newOrder)
-                                .doOnSuccess(savedOrder -> 
+                                .doOnSuccess(savedOrder -> {
                                     log.info("New order successfully created with orderId: {}, status: {}", 
-                                            orderId, savedOrder.getStatus())
-                                );
+                                            orderId, savedOrder.getStatus());
+                                    ordersCreatedCounter.increment();
+                                });
                     })
                 );
     }
